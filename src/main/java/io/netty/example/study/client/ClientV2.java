@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.example.study.client.codec.*;
 import io.netty.example.study.client.dispatcher.OperationResultFuture;
@@ -38,6 +39,8 @@ public class ClientV2 {
         // 设置i/o 模式。 这个是反射+工厂获取的
         bootstrap.channel(NioSocketChannel.class);
 
+        // 设置连接超时时间
+        bootstrap.option(NioChannelOption.CONNECT_TIMEOUT_MILLIS, 10 * 1000);
         // 设置reactor模式
         bootstrap.group(new NioEventLoopGroup());
 
@@ -79,7 +82,7 @@ public class ClientV2 {
 
         OperationResultFuture operationResultFuture = new OperationResultFuture();
         // 在发送之前做
-        requestPendingCenter.add(streamId,operationResultFuture);
+        requestPendingCenter.add(streamId, operationResultFuture);
 
 //        Operation operation = new OrderOperation(9527, "photo");
         // 当然，如果我们使用RequestMessage也是可以写进去的，因为MessageToMessageEncoder做了一个判断，就是我们的输入类型必须

@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.nio.NioEventLoop;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -16,6 +17,7 @@ import io.netty.example.study.server.codec.OrderProtocolEncoder;
 import io.netty.example.study.server.handler.OrderServerProcessHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.util.concurrent.ExecutionException;
 
@@ -35,8 +37,11 @@ public class Server {
         // 设置i/o 模式。 这个是反射+工厂获取的
         serverBootstrap.channel(NioServerSocketChannel.class);
 
+        // 设置线程池的名称
+        NioEventLoopGroup boss = new NioEventLoopGroup(1,new DefaultThreadFactory("boss"));
+        NioEventLoopGroup worker = new NioEventLoopGroup(1,new DefaultThreadFactory("worker"));
         // 设置reactor模式
-        serverBootstrap.group(new NioEventLoopGroup());
+        serverBootstrap.group(boss,worker);
 
         // TCP是用来实际的传数据的这个参数，所以这个是childOption,即SocketChannel
         serverBootstrap.childOption(NioChannelOption.TCP_NODELAY,true);
@@ -60,8 +65,9 @@ public class Server {
                 // 处理完成之后，第一步要把ResponseMessage->ByteBuf Protocol
                 // 这个pipeline请求和发送是反着的，所以处理粘包和半包问题的FrameEncoder
                 // 要在ProtocolEncoder之后
-                pipeline.addLast(new OrderFrameDecoder());
-                pipeline.addLast(new OrderFrameEncoder());
+                pipeline.addLast("frameDecoder",new OrderFrameDecoder());
+                // 给handler新增名称
+                pipeline.addLast("frameEncoder",new OrderFrameEncoder());
                 pipeline.addLast(new OrderProtocolDecoder());
                 pipeline.addLast(new OrderProtocolEncoder());
                 pipeline.addLast(new OrderServerProcessHandler());
