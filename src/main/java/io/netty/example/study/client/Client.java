@@ -10,7 +10,6 @@ import io.netty.example.study.client.codec.OrderFrameDecoder;
 import io.netty.example.study.client.codec.OrderFrameEncoder;
 import io.netty.example.study.client.codec.OrderProtocolDecoder;
 import io.netty.example.study.client.codec.OrderProtocolEncoder;
-import io.netty.example.study.common.Operation;
 import io.netty.example.study.common.RequestMessage;
 import io.netty.example.study.common.order.OrderOperation;
 import io.netty.example.study.util.IdUtil;

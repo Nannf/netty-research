@@ -8,9 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.example.study.client.codec.*;
 import io.netty.example.study.common.Operation;
-import io.netty.example.study.common.RequestMessage;
 import io.netty.example.study.common.order.OrderOperation;
-import io.netty.example.study.util.IdUtil;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
