@@ -6,6 +6,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.example.study.server.codec.OrderFrameDecoder;
@@ -36,6 +37,12 @@ public class Server {
 
         // 设置reactor模式
         serverBootstrap.group(new NioEventLoopGroup());
+
+        // TCP是用来实际的传数据的这个参数，所以这个是childOption,即SocketChannel
+        serverBootstrap.childOption(NioChannelOption.TCP_NODELAY,true);
+        // 这个是最大的等待连接数，这个是ServerSocketChannel的工作
+        // 不代表一个真正的连接实体
+        serverBootstrap.option(NioChannelOption.SO_BACKLOG,1024);
 
         // 设置日志
         serverBootstrap.handler(new LoggingHandler(LogLevel.INFO));

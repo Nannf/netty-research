@@ -26,5 +26,9 @@ public class OrderServerProcessHandler extends SimpleChannelInboundHandler<Reque
         // 此时没有out参数了
         // 此时的responseMessage需要发送给客户端，为了解决粘包和半包问题，我们需要新建两个encoder
         channelHandlerContext.writeAndFlush(responseMessage);
+
+        // 这种最好不要乱用，这个会把消息给pipeline上所有的handler
+        // 某些情况下会有死循环
+//        channelHandlerContext.channel().writeAndFlush(responseMessage);
     }
 }
