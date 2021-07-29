@@ -47,6 +47,12 @@ public class Server {
             protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
                 ChannelPipeline pipeline = nioSocketChannel.pipeline();
                 // 这个地方是有顺序的,顺序错了就会失败
+                // 核心是4+1
+                // 最开始肯定是解码，解码第一个是粘包和半包问题的处理
+                // Frame -> Protocol -> Handler(业务处理)
+                // 处理完成之后，第一步要把ResponseMessage->ByteBuf Protocol
+                // 这个pipeline请求和发送是反着的，所以处理粘包和半包问题的FrameEncoder
+                // 要在ProtocolEncoder之后
                 pipeline.addLast(new OrderFrameDecoder());
                 pipeline.addLast(new OrderFrameEncoder());
                 pipeline.addLast(new OrderProtocolDecoder());

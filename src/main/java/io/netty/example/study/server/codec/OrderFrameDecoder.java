@@ -12,6 +12,13 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
  */
 public class OrderFrameDecoder extends LengthFieldBasedFrameDecoder {
     public OrderFrameDecoder() {
-        super(Integer.MAX_VALUE, 0, 2, 0, 2);
+        // 这个地方的initialBytesToStrip设置的要和lengthFieldLength一致
+        // 这是因为我们解析的时候只获取业务字段，不要长度字段
+        super(
+                Integer.MAX_VALUE,
+                0,
+                2,
+                0,
+                2);
     }
 }
