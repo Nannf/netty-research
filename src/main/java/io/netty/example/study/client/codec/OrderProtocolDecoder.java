@@ -13,7 +13,10 @@ import java.util.List;
  * @Description
  * 第二层的解码器，输入是FrameDecoder的没有粘包和半包问题的ByteBuf
  * 输出是我们业务定义的RequestMessage,
- * 注意泛型参数是我们的ByteBuf,不是结果。ByteBuf可能使用的是堆外内存，或者内存池，使用完之后需要释放，这个在handler处理的
+ * 注意泛型参数是我们的ByteBuf,不是结果。
+ * ByteBuf可能使用的是堆外内存，或者内存池，使用完之后需要释放，这个在handler处理的
+ * 这个是第二层解码，输出是ResponseMessage
+ *
  * @date 2021/7/28 17:58
  */
 public class OrderProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {

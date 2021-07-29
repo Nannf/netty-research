@@ -5,7 +5,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 /**
  * @author Akmd Nannf
  * @version v1.0
- * @Description 客户端的第一层
+ * @Description 客户端的第一层，解决半包粘包问题
  * @date 2021/7/28 17:20
  */
 public class OrderFrameDecoder extends LengthFieldBasedFrameDecoder {
