@@ -15,6 +15,7 @@ import io.netty.example.study.server.codec.OrderFrameEncoder;
 import io.netty.example.study.server.codec.OrderProtocolDecoder;
 import io.netty.example.study.server.codec.OrderProtocolEncoder;
 import io.netty.example.study.server.handler.OrderServerProcessHandler;
+import io.netty.example.study.server.metric.MetricHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -52,8 +53,11 @@ public class Server {
         // 设置日志
         serverBootstrap.handler(new LoggingHandler(LogLevel.INFO));
 
-        // 设置codec和handler
+        // 因为需要计算连接数量，所以这个是每个客户端连接都公用的handler
+        MetricHandler metricHandler = new MetricHandler();
 
+        // 设置codec和handler
+        // handler 都是new的，每个
         serverBootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
             @Override
             protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
@@ -68,10 +72,13 @@ public class Server {
                 pipeline.addLast("frameDecoder",new OrderFrameDecoder());
                 // 给handler新增名称
                 pipeline.addLast("frameEncoder",new OrderFrameEncoder());
+
+                // 每个handler都是new的新对象，不是单例模式
                 pipeline.addLast(new OrderProtocolDecoder());
                 pipeline.addLast(new OrderProtocolEncoder());
                 pipeline.addLast(new OrderServerProcessHandler());
 
+                pipeline.addLast(metricHandler);
                 pipeline.addLast(new LoggingHandler(LogLevel.INFO));
             }
         });
