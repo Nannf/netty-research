@@ -1,5 +1,6 @@
 package io.netty.example.study.server.handler;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.example.study.common.*;
@@ -16,6 +17,11 @@ import io.netty.example.study.common.*;
 public class OrderServerProcessHandler extends SimpleChannelInboundHandler<RequestMessage> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RequestMessage requestMessage) throws Exception {
+        // 申请，但是我们不释放
+        // 这里是用来检测内存泄漏的，但是我们知道只要在gc的时候才会发生检测
+        // 我们要怎么发生gc呢，让客户端不停的发数据，
+        ByteBuf buffer = channelHandlerContext.alloc().buffer();
+
         Operation operation = requestMessage.getMessageBody();
         OperationResult operationResult = operation.execute();
 
