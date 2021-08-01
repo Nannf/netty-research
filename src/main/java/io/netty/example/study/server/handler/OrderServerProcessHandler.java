@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.example.study.common.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Akmd Nannf
@@ -14,6 +15,7 @@ import io.netty.example.study.common.*;
  * 之所以继承SimpleChannelInboundHandler是因为它可以帮我释放资源
  * @date 2021/7/28 18:07
  */
+@Slf4j
 public class OrderServerProcessHandler extends SimpleChannelInboundHandler<RequestMessage> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RequestMessage requestMessage) throws Exception {
@@ -29,12 +31,18 @@ public class OrderServerProcessHandler extends SimpleChannelInboundHandler<Reque
         responseMessage.setMessageHeader(requestMessage.getMessageHeader());
         responseMessage.setMessageBody(operationResult);
 
-        // 此时没有out参数了
-        // 此时的responseMessage需要发送给客户端，为了解决粘包和半包问题，我们需要新建两个encoder
-        channelHandlerContext.writeAndFlush(responseMessage);
+        // 这种是为了防止oom
+        if (channelHandlerContext.channel().isActive() && channelHandlerContext.channel().isWritable()) {
+            // 此时没有out参数了
+            // 此时的responseMessage需要发送给客户端，为了解决粘包和半包问题，我们需要新建两个encoder
+            channelHandlerContext.writeAndFlush(responseMessage);
 
-        // 这种最好不要乱用，这个会把消息给pipeline上所有的handler
-        // 某些情况下会有死循环
+            // 这种最好不要乱用，这个会把消息给pipeline上所有的handler
+            // 某些情况下会有死循环
 //        channelHandlerContext.channel().writeAndFlush(responseMessage);
+        } else {
+            log.error("message dropped");
+        }
+
     }
 }

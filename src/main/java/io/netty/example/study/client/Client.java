@@ -67,10 +67,10 @@ public class Client {
         // 有没有办法呢？这个其实是二次编码，MessageToMessage,我们可以新增一个实现类，来完成这种转换
         RequestMessage requestMessage = new RequestMessage(IdUtil.nextId(), new OrderOperation(9527, "photo"));
 
+        channelFuture.channel().writeAndFlush(requestMessage);
         // 这个作用是为了让服务器端发生gc
-        for (int i = 0; i < 20; i++) {
-            channelFuture.channel().writeAndFlush(requestMessage);
-        }
+//        for (int i = 0; i < 20; i++) {
+//        }
 
 
 

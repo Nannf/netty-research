@@ -1,11 +1,9 @@
 package io.netty.example.study.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.nio.NioEventLoop;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -15,14 +13,13 @@ import io.netty.example.study.server.codec.OrderFrameEncoder;
 import io.netty.example.study.server.codec.OrderProtocolDecoder;
 import io.netty.example.study.server.codec.OrderProtocolEncoder;
 import io.netty.example.study.server.handler.OrderServerProcessHandler;
+import io.netty.example.study.server.handler.ServerIdleCheckHandler;
 import io.netty.example.study.server.metric.MetricHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
-import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Akmd Nannf
@@ -74,6 +71,8 @@ public class Server {
             @Override
             protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
                 ChannelPipeline pipeline = nioSocketChannel.pipeline();
+
+                pipeline.addLast("idleCheckHandler", new ServerIdleCheckHandler());
                 // 这个地方是有顺序的,顺序错了就会失败
                 // 核心是4+1
                 // 最开始肯定是解码，解码第一个是粘包和半包问题的处理
@@ -88,6 +87,7 @@ public class Server {
                 // 每个handler都是new的新对象，不是单例模式
                 pipeline.addLast(new OrderProtocolDecoder());
                 pipeline.addLast(new OrderProtocolEncoder());
+
 
                 // 我们的业务如果特别耗费性能的话，比如等待io，我们是否考虑使用多线程优化
                 // 多线程优化的是什么呢
