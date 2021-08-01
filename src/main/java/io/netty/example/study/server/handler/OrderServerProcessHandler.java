@@ -20,7 +20,7 @@ public class OrderServerProcessHandler extends SimpleChannelInboundHandler<Reque
         // 申请，但是我们不释放
         // 这里是用来检测内存泄漏的，但是我们知道只要在gc的时候才会发生检测
         // 我们要怎么发生gc呢，让客户端不停的发数据，
-        ByteBuf buffer = channelHandlerContext.alloc().buffer();
+//        ByteBuf buffer = channelHandlerContext.alloc().buffer();
 
         Operation operation = requestMessage.getMessageBody();
         OperationResult operationResult = operation.execute();

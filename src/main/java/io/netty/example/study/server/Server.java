@@ -19,8 +19,10 @@ import io.netty.example.study.server.metric.MetricHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.concurrent.UnorderedThreadPoolEventExecutor;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Akmd Nannf
@@ -56,6 +58,16 @@ public class Server {
         // 因为需要计算连接数量，所以这个是每个客户端连接都公用的handler
         MetricHandler metricHandler = new MetricHandler();
 
+        // 这个是共享的线程池
+//        UnorderedThreadPoolEventExecutor business = new UnorderedThreadPoolEventExecutor(10, new DefaultThreadFactory("business"));
+
+
+        // 当线程数是0的时候，默认是根据当前机器的cpu核数来计算
+        // 我们发现，当我们使用这个作为运行任务的线程池的时候，和单线程是没有区别的
+        // 这个的原因是因为ChannelOption.SINGLE_EVENTEXECUTOR_PER_GROUP默认是true的
+        // 在这个情况下，我们的NioEventLoopGroup返回的线程不是线程池本身，而是线程池中的一个线程
+        NioEventLoopGroup business = new NioEventLoopGroup(0, new DefaultThreadFactory("business"));
+
         // 设置codec和handler
         // handler 都是new的，每个
         serverBootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
@@ -76,7 +88,13 @@ public class Server {
                 // 每个handler都是new的新对象，不是单例模式
                 pipeline.addLast(new OrderProtocolDecoder());
                 pipeline.addLast(new OrderProtocolEncoder());
-                pipeline.addLast(new OrderServerProcessHandler());
+
+                // 我们的业务如果特别耗费性能的话，比如等待io，我们是否考虑使用多线程优化
+                // 多线程优化的是什么呢
+                // 为什么多线程可以优化呢？
+                // 这个是因为一个EventLoop负责处置多个客户端连接，而且整个响应是异步的
+                // 这样我们使用多线程可以是单个EventLoop的处置更快
+                pipeline.addLast(business,new OrderServerProcessHandler());
 
                 pipeline.addLast(metricHandler);
                 pipeline.addLast(new LoggingHandler(LogLevel.INFO));

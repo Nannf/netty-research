@@ -68,9 +68,10 @@ public class Client {
         RequestMessage requestMessage = new RequestMessage(IdUtil.nextId(), new OrderOperation(9527, "photo"));
 
         // 这个作用是为了让服务器端发生gc
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 20; i++) {
             channelFuture.channel().writeAndFlush(requestMessage);
         }
+
 
 
         channelFuture.channel().closeFuture().get();
